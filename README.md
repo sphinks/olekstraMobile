@@ -1,0 +1,1 @@
+Mobile client to retrive list of pharmacy that are used on Olekstra.ru
