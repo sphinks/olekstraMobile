@@ -2,9 +2,9 @@
 <widget id="ru.olekstra.Pharmacy" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>PharmacyInfo</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        An app to recive list of pharmacy working with Olekastra.
     </description>
-    <author email="dev@callback.apache.org" href="http://cordova.io">
+    <author email="sphinks@newmail.ru" href="http://cordova.io">
         Apache Cordova Team
     </author>
     <access origin="*" />
