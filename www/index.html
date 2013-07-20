@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<title>My Page</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+<script type="text/javascript" language="JavaScript">
+
+	/*document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("deviceready",function(){
+        document.addEventListener("online", function(){...}, false);
+        document.addEventListener("offline", function(){...}, false);
+    },false);
+	}, false);*/
+
+			
+
+	function loadPharmacyList() {
+
+		var myurl="http://www.olekstra.ru/pharmacies";
+		//make the call to YQL to avoid cross-domain policy in browser
+		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+			"q=select%20*%20from%20html%20where%20url%3D%22"+
+			encodeURIComponent(myurl)+
+			"%22&format=xml'&callback=?",
+			function(data){
+				if(data.results[0]){
+					var htmlCode = data.results[0];
+					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
+						var metroStation = $(this).find('td')[1];
+						var pharmName = $(this).find('td')[2];
+						var pharmAddress = $(this).find('td')[3];
+						var workTime = $(this).find('td')[4];
+						workTime = $(workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+							if (pharmName) {
+								console.log($(workTime).html());
+								var liCode = '<li><a href="#"><h3>' + $(pharmName).text() + '</h3>' +
+								'<p><strong>Адрес:</strong>' + $(pharmAddress).text() + '</p>' +
+								'<p class="ui-li-aside"><strong>' + $(workTime).text() + '</strong></p>' +
+								'</a></li>';
+								$('#pharmList').append(liCode);					
+							}
+					});
+				} else {
+					var errormsg = 'Error: could not load the page.';
+					console.log(errormsg);
+				}
+				$('#pharmList').listview('refresh');
+			}
+		);
+	} 
+</script>
+</head>
+<body onload="loadPharmacyList()">
+<div data-role="page">
+	<div data-role="header">
+		<h1>My Title</h1>
+	</div><!-- /header -->
+	<div data-role="content">
+		<p>Hello world</p>
+		<ul data-role="listview" data-inset="true" data-filter="true" id="pharmList">
+		</ul>
+	</div><!-- /content -->
+	<div data-role="footer">
+		<h4>My Footer</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+</body>
+</html>
