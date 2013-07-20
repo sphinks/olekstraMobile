@@ -18,12 +18,27 @@
     },false);
 	}, false);*/
 
+	function showLoadingBar(textForLoad) {
+
+		$.mobile.loading( 'show', {
+			text: textForLoad,
+			textVisible: true,
+			theme: "a",
+			textonly: false,
+			html: ""
+		});
+	}
+
+	function hideLoadingBar() {
+		$.mobile.loading('hide');
+	}
 			
 
 	function loadPharmacyList() {
 
 		var myurl="http://www.olekstra.ru/pharmacies";
 		//make the call to YQL to avoid cross-domain policy in browser
+		showLoadingBar("Загружается список аптек...");
 		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
 			"q=select%20*%20from%20html%20where%20url%3D%22"+
 			encodeURIComponent(myurl)+
@@ -38,10 +53,11 @@
 						var workTime = $(this).find('td')[4];
 						workTime = $(workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
 							if (pharmName) {
-								console.log($(workTime).html());
+								console.log($(metroStation).text());
 								var liCode = '<li><a href="#"><h3>' + $(pharmName).text() + '</h3>' +
 								'<p><strong>Адрес:</strong>' + $(pharmAddress).text() + '</p>' +
-								'<p class="ui-li-aside"><strong>' + $(workTime).text() + '</strong></p>' +
+								'<p class="ui-li-aside"><strong>м. ' + $(metroStation).text() + '</strong><br>' +
+								$(workTime).text() + '</p>'
 								'</a></li>';
 								$('#pharmList').append(liCode);					
 							}
@@ -50,6 +66,7 @@
 					var errormsg = 'Error: could not load the page.';
 					console.log(errormsg);
 				}
+				hideLoadingBar();
 				$('#pharmList').listview('refresh');
 			}
 		);
@@ -59,10 +76,16 @@
 <body onload="loadPharmacyList()">
 <div data-role="page">
 	<div data-role="header">
-		<h1>My Title</h1>
+		<h1>Список аптек оператора страхования "Олекстра"</h1>
+		<div data-role="navbar" data-iconpos="left">
+			<ul>
+				<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
+				<li><a href="#">Препараты</a></li>
+				<li><a href="#" data-icon="search">Поиск</a></li>
+			</ul>
+		</div><!-- /navbar -->
 	</div><!-- /header -->
 	<div data-role="content">
-		<p>Hello world</p>
 		<ul data-role="listview" data-inset="true" data-filter="true" id="pharmList">
 		</ul>
 	</div><!-- /content -->
