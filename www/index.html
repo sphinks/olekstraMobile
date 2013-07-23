@@ -24,7 +24,7 @@
 			text: textForLoad,
 			textVisible: true,
 			theme: "a",
-			textonly: false,
+			textonly: true,
 			html: ""
 		});
 	}
@@ -32,9 +32,14 @@
 	function hideLoadingBar() {
 		$.mobile.loading('hide');
 	}
+
+	function onStartLoad() {
+		loadPharmacyList();
+		loadDrugstoresList();
+	}
 			
 
-	function loadPharmacyList() {
+	function loadDrugstoresList() {
 
 		var myurl="http://www.olekstra.ru/pharmacies";
 		//make the call to YQL to avoid cross-domain policy in browser
@@ -54,13 +59,49 @@
 						workTime = $(workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
 							if (pharmName) {
 								console.log($(metroStation).text());
-								var liCode = '<li><a href="#"><h3>' + $(pharmName).text() + '</h3>' +
+								var liCode = '<li><a href="#"><h3>м. ' + $(metroStation).text() + '</h3>' +
 								'<p><strong>Адрес:</strong>' + $(pharmAddress).text() + '</p>' +
-								'<p class="ui-li-aside"><strong>м. ' + $(metroStation).text() + '</strong><br>' +
+								'<p class="ui-li-aside"><strong>' + $(pharmName).text() + '</strong><br>' +
 								$(workTime).text() + '</p>'
 								'</a></li>';
-								$('#pharmList').append(liCode);					
+								$('#drugStoreList').append(liCode);					
 							}
+					});
+				} else {
+					var errormsg = 'Error: could not load the page.';
+					console.log(errormsg);
+				}
+				hideLoadingBar();
+				$('#drugStoreList').listview('refresh');
+			}
+		);
+	}
+
+
+	function loadPharmacyList() {
+
+		var targetUrl ="http://www.olekstra.ru/preparati";
+		//make the call to YQL to avoid cross-domain policy in browser
+		showLoadingBar("Загружается список аптек...");
+		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+			"q=select%20*%20from%20html%20where%20url%3D%22"+
+			encodeURIComponent(targetUrl)+
+			"%22&format=xml'&callback=?",
+			function(data){
+				if(data.results[0]){
+					var htmlCode = data.results[0];
+					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
+						var drugName = $(this).find('td')[0];
+						var drugPrice = $(this).find('td')[1];
+						var drugLink = $(this).find('td')[2];
+						if (drugName) {
+							console.log($(drugName).text());
+							var liCode = '<li><a href="#"><p>' + $(drugName).text() + '</p>' +
+							//'<p><strong>Адрес:</strong>' + $(drugLink).find('a').attr('href') + '</p>' +
+							'<p><strong>Минимальная цена без скидки: ' + $(drugPrice).text() + '</strong></p>'
+							'</a></li>';
+							$('#pharmList').append(liCode);					
+						}
 					});
 				} else {
 					var errormsg = 'Error: could not load the page.';
@@ -70,28 +111,53 @@
 				$('#pharmList').listview('refresh');
 			}
 		);
-	} 
+	}
 </script>
 </head>
-<body onload="loadPharmacyList()">
-<div data-role="page">
-	<div data-role="header">
-		<h1>Список аптек оператора страхования "Олекстра"</h1>
-		<div data-role="navbar" data-iconpos="left">
-			<ul>
-				<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
-				<li><a href="#">Препараты</a></li>
-				<li><a href="#" data-icon="search">Поиск</a></li>
+<body onload="onStartLoad()">
+	<div data-role="page" id="drugstores">
+		<div data-role="header">
+			<h1>Список аптек оператора страхования "Олекстра"</h1>
+			<div data-role="navbar" data-iconpos="left">
+				<ul>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
+					<li><a href="#drugs">Препараты</a></li>
+					<li><a href="#" data-icon="search">Поиск</a></li>
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true" data-filter="true" id="drugStoreList">
 			</ul>
-		</div><!-- /navbar -->
-	</div><!-- /header -->
-	<div data-role="content">
-		<ul data-role="listview" data-inset="true" data-filter="true" id="pharmList">
-		</ul>
-	</div><!-- /content -->
-	<div data-role="footer">
-		<h4>My Footer</h4>
-	</div><!-- /footer -->
-</div><!-- /page -->
+		</div><!-- /content -->
+		<div data-role="footer">
+			<h4>My Footer</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+	<div data-role="page" id="drugs">
+		<div data-role="header">
+			<h1>Список препаратов со скидкой 50%</h1>
+			<div data-role="navbar" data-iconpos="left">
+				<ul>
+					<li><a href="#drugstores">Аптеки</a></li>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Препараты</a></li>
+					<li><a href="#" data-icon="search">Поиск</a></li>
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content">
+		<p>Препараты, отмеченные звездочкой (*), имеют ограничение по общей сумме покупок. Размер суммы покупок для этой группы лекарств составляет 2400 руб./год, максимальная сумма покупки за один квартал не может превышать 600 руб. Препараты без звездочки не имеют ограничений по сумме покупки.</p>
+
+		<p>На препараты, не указанные в списке, аптеки предоставляют скидки до 5%.</p>
+
+		<p>При покупке препаратов в аптеке сообщайте наименование фирмы-производителя, указанного в названии препарата. Например, "Троксерутин, Зентива": "Троксерутин" - наименование препарата, "Зентива" - наименование производителя. Некоторые препараты в аптеках имеют одинаковое название, но разных производителей. Скидка 50% распространяется только на препараты указанных в таблице производителей. Для всех прочих препаратов скидка составит только до 5%.</p>
+			<ul data-role="listview" data-inset="true" data-filter="true" id="pharmList">
+			</ul>
+		</div><!-- /content -->
+		<div data-role="footer">
+			<h4>My Footer</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
 </body>
 </html>
