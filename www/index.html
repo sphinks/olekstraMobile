@@ -59,7 +59,7 @@
 						var workTime = $(this).find('td')[4];
 						workTime = $(workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
 							if (pharmName) {
-								console.log($(metroStation).text());
+								//console.log($(metroStation).text());
 								var liCode = "";
 								if (dividerMetroName != $(metroStation).text()) {
 									liCode = '<li data-role="list-divider">' + $(metroStation).text() + '</li>';
@@ -83,6 +83,17 @@
 		);
 	}
 
+	function saveToLocalStorage(drugstoreList) {
+		// use the local storage API to persist the data as JSON
+    	window.localStorage.setItem("ru.pharmanet.drugstoreList", JSON.stringify("test"));
+	}
+
+	function loadFromLocalStorage(drugstoreList) {
+		// use the local storage API to persist the data as JSON
+    	var theList = JSON.parse(window.localStorage.getItem("ru.pharmanet.drugstoreList"));
+    	console.log("Read: " + theList);
+	}
+
 
 	function loadPharmacyList() {
 
@@ -101,7 +112,7 @@
 						var drugPrice = $(this).find('td')[1];
 						var drugLink = $(this).find('td')[2];
 						if (drugName) {
-							console.log($(drugName).text());
+							//console.log($(drugName).text());
 							var liCode = '<li><a href="#"><p>' + $(drugName).text() + '</p>' +
 							//'<p><strong>Адрес:</strong>' + $(drugLink).find('a').attr('href') + '</p>' +
 							'<p><strong>Минимальная цена без скидки: ' + $(drugPrice).text() + '</strong></p>'
