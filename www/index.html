@@ -49,6 +49,7 @@
 			encodeURIComponent(myurl)+
 			"%22&format=xml'&callback=?",
 			function(data){
+				var dividerMetroName = "";
 				if(data.results[0]){
 					var htmlCode = data.results[0];
 					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
@@ -59,7 +60,12 @@
 						workTime = $(workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
 							if (pharmName) {
 								console.log($(metroStation).text());
-								var liCode = '<li><a href="#"><h3>м. ' + $(metroStation).text() + '</h3>' +
+								var liCode = "";
+								if (dividerMetroName != $(metroStation).text()) {
+									liCode = '<li data-role="list-divider">' + $(metroStation).text() + '</li>';
+									dividerMetroName = $(metroStation).text();
+								}
+								liCode = liCode + '<li><a href="#"><h3>м. ' + $(metroStation).text() + '</h3>' +
 								'<p><strong>Адрес:</strong>' + $(pharmAddress).text() + '</p>' +
 								'<p class="ui-li-aside"><strong>' + $(pharmName).text() + '</strong><br>' +
 								$(workTime).text() + '</p>'
@@ -122,12 +128,12 @@
 				<ul>
 					<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
 					<li><a href="#drugs">Препараты</a></li>
-					<li><a href="#" data-icon="search">Поиск</a></li>
+					<!--<li><a href="#" data-icon="search">Поиск</a></li>-->
 				</ul>
 			</div><!-- /navbar -->
 		</div><!-- /header -->
 		<div data-role="content">
-			<ul data-role="listview" data-inset="true" data-filter="true" id="drugStoreList">
+			<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Поиск..." id="drugStoreList">
 			</ul>
 		</div><!-- /content -->
 		<div data-role="footer">
@@ -142,7 +148,7 @@
 				<ul>
 					<li><a href="#drugstores">Аптеки</a></li>
 					<li><a href="#" class="ui-btn-active ui-state-persist">Препараты</a></li>
-					<li><a href="#" data-icon="search">Поиск</a></li>
+					<!--<li><a href="#" data-icon="search">Поиск</a></li>-->
 				</ul>
 			</div><!-- /navbar -->
 		</div><!-- /header -->
@@ -152,7 +158,7 @@
 		<p>На препараты, не указанные в списке, аптеки предоставляют скидки до 5%.</p>
 
 		<p>При покупке препаратов в аптеке сообщайте наименование фирмы-производителя, указанного в названии препарата. Например, "Троксерутин, Зентива": "Троксерутин" - наименование препарата, "Зентива" - наименование производителя. Некоторые препараты в аптеках имеют одинаковое название, но разных производителей. Скидка 50% распространяется только на препараты указанных в таблице производителей. Для всех прочих препаратов скидка составит только до 5%.</p>
-			<ul data-role="listview" data-inset="true" data-filter="true" id="pharmList">
+			<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Поиск..." id="pharmList">
 			</ul>
 		</div><!-- /content -->
 		<div data-role="footer">
