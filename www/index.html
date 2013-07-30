@@ -150,15 +150,31 @@
 				if (dividerMetroName != drugStore.metroStation) {
 					liCode = '<li data-role="list-divider">' + drugStore.metroStation + '</li>';
 					dividerMetroName = drugStore.metroStation;
+					$('#drugStoreList').append(liCode);
 				}
-				liCode = liCode + '<li><a href="#"><h3>м. ' + drugStore.metroStation + '</h3>' +
+				liCode = '<li><a href="#"><h3>м. ' + drugStore.metroStation + '</h3>' +
 				'<p><strong>Адрес:</strong>' + drugStore.pharmAddress + '</p>' +
 				'<p class="ui-li-aside"><strong>' + drugStore.pharmName + '</strong><br>' +
-				drugStore.workTime + '</p>'
-				'</a></li>';
+				drugStore.workTime + '</p></a></li>';
+				//console.log("Add event handler with id: " + i); 
+				/*$('#drugStoreList').append(function() {
+					//var newVar = i;
+					//console.log("Has var:" + newVar); 
+					return $(liCode).click(function() {
+						loadDrugstoreDetail(i); 
+					});
+				});*/
 				$('#drugStoreList').append(liCode);
+        		(function(newVar){
+				$('#drugStoreList li:last').on('click', function() {
+					return loadDrugstoreDetail(newVar);
+				});})(i);
 			}
 		};
+	}
+
+	function loadDrugstoreDetail(drugstoreInfo) { 
+		console.log("Drugstore detail: " + drugstoreInfo); 
 	}
 
 	function saveToLocalStorage(drugstoreList) {
