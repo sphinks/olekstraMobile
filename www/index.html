@@ -152,7 +152,7 @@
 					dividerMetroName = drugStore.metroStation;
 					$('#drugStoreList').append(liCode);
 				}
-				liCode = '<li><a href="#"><h3>м. ' + drugStore.metroStation + '</h3>' +
+				liCode = '<li><a href="#drugstoreInfo"><h3>м. ' + drugStore.metroStation + '</h3>' +
 				'<p><strong>Адрес:</strong>' + drugStore.pharmAddress + '</p>' +
 				'<p class="ui-li-aside"><strong>' + drugStore.pharmName + '</strong><br>' +
 				drugStore.workTime + '</p></a></li>';
@@ -168,13 +168,18 @@
         		(function(newVar){
 				$('#drugStoreList li:last').on('click', function() {
 					return loadDrugstoreDetail(newVar);
-				});})(i);
+				});})(drugStore);
 			}
 		};
 	}
 
 	function loadDrugstoreDetail(drugstoreInfo) { 
-		console.log("Drugstore detail: " + drugstoreInfo); 
+		console.log("Drugstore detail: " + drugstoreInfo.metroStation);
+		$('#drugStoreDetailName').html(drugstoreInfo.pharmName); 
+		$('#drugStoreDetailMetro').html(drugstoreInfo.metroStation);
+		$('#drugStoreDetailAddress').html(drugstoreInfo.pharmAddress);
+		$('#drugStoreDetailTime').html(drugstoreInfo.workTime); 
+		$.mobile.changePage($("#drugstoreInfo"), "slideleft");
 	}
 
 	function saveToLocalStorage(drugstoreList) {
@@ -267,7 +272,39 @@
 			</ul>
 		</div><!-- /content -->
 		<div data-role="footer">
-			<h4>My Footer</h4>
+			
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+	<div data-role="page" id="drugstoreInfo">
+		<div data-role="header">
+			<div data-role="navbar" data-iconpos="left">
+				<ul>
+					<li><a href="#drugstores">Аптеки</a></li>
+					<li><a href="#drugs">Препараты</a></li>
+					<!--<li><a href="#" data-icon="search">Поиск</a></li>-->
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content">
+			<div class="ui-grid-a">
+				<div class="ui-block-a"><strong>Аптека: </strong></div>
+				<div class="ui-block-b" id="drugStoreDetailName"></div>
+			</div><!-- /grid-a -->
+			<div class="ui-grid-a">
+				<div class="ui-block-a"><strong>Метро: </strong></div>
+				<div class="ui-block-b" id="drugStoreDetailMetro"></div>
+			</div><!-- /grid-a -->
+			<div class="ui-grid-a">
+				<div class="ui-block-a"><strong>Адрес: </strong></div>
+				<div class="ui-block-b" id="drugStoreDetailAddress"></div>
+			</div><!-- /grid-a -->
+			<div class="ui-grid-a">
+				<div class="ui-block-a"><strong>Время работы: </strong></div>
+				<div class="ui-block-b" id="drugStoreDetailTime"></div>
+			</div><!-- /grid-a -->
+		</div><!-- /content -->
+		<div data-role="footer">
 		</div><!-- /footer -->
 	</div><!-- /page -->
 </body>
