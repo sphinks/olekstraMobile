@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+<title>My Page</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+<script type="text/javascript" language="JavaScript">
+
+	/*document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("deviceready",function(){
+        document.addEventListener("online", function(){...}, false);
+        document.addEventListener("offline", function(){...}, false);
+    },false);
+	}, false);*/
+
+	function showLoadingBar(textForLoad) {
+
+		$.mobile.loading( 'show', {
+			text: textForLoad,
+			textVisible: true,
+			theme: "a",
+			textonly: true,
+			html: ""
+		});
+	}
+
+	function hideLoadingBar() {
+		$.mobile.loading('hide');
+	}
+
+	function onStartLoad() {
+		loadPharmacyList();
+		loadDrugstoresList();
+	}
+			
+
+	function loadDrugstoresList() {
+
+		var drugstoreArray = loadFromLocalStorage();
+		showLoadingBar("Загружается список аптек...");
+		if (null == drugstoreArray || drugstoreArray == "null")
+	    {
+	    	showLoadingBar("Загружается список аптек с сайта...");
+			var myurl="http://www.olekstra.ru/pharmacies";
+			//make the call to YQL to avoid cross-domain policy in browser
+			
+			$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+				"q=select%20*%20from%20html%20where%20url%3D%22"+
+				encodeURIComponent(myurl)+
+				"%22&format=xml'&callback=?",
+				function(data){
+					var dividerMetroName = "";
+					var drugstoreArray = new Array();
+					if(data.results[0]){
+						var htmlCode = data.results[0];
+						$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
+							var drugStore = {};
+							drugStore.metroStation = $(this).find('td')[1];
+							drugStore.pharmName = $(this).find('td')[2];
+							drugStore.pharmAddress = $(this).find('td')[3];
+							drugStore.workTime = $(this).find('td')[4];
+
+							drugStore.workTime = $(drugStore.workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+							if (drugStore.pharmName) {
+								drugStore.metroStation = $(drugStore.metroStation).text();
+								drugStore.pharmName = $(drugStore.pharmName).text();
+								drugStore.pharmAddress = $(drugStore.pharmAddress).text();
+								drugStore.workTime = $(drugStore.workTime).text();
+								//console.log(drugStore);
+								drugstoreArray.push(drugStore);
+							}
+						});
+						//console.log("Drugstore array: " + drustoreArray);
+						updateDrugstoreListView(drugstoreArray);
+						saveToLocalStorage(drugstoreArray);
+					} else {
+						var errormsg = 'Error: could not load the page.';
+						console.log(errormsg);
+					}
+					hideLoadingBar();
+					$('#drugStoreList').listview('refresh');
+				}
+			);
+		}else{
+			updateDrugstoreListView(drugstoreArray);		
+			hideLoadingBar();
+			$('#drugStoreList').listview('refresh');
+		}		
+	}
+
+	function loadListFromSourceSite() {
+
+		console.log("LOAD FROM NET");
+		var myurl="http://www.olekstra.ru/pharmacies";
+		//make the call to YQL to avoid cross-domain policy in browser
+		
+		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+			"q=select%20*%20from%20html%20where%20url%3D%22"+
+			encodeURIComponent(myurl)+
+			"%22&format=xml'&callback=?",
+			function(data){
+				var dividerMetroName = "";
+				var drugstoreArray = new Array();
+				if(data.results[0]){
+					var htmlCode = data.results[0];
+					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
+						var drugStore = {};
+						drugStore.metroStation = $(this).find('td')[1];
+						drugStore.pharmName = $(this).find('td')[2];
+						drugStore.pharmAddress = $(this).find('td')[3];
+						drugStore.workTime = $(this).find('td')[4];
+
+						drugStore.workTime = $(drugStore.workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+						if (drugStore.pharmName) {
+							drugStore.metroStation = $(drugStore.metroStation).text();
+							drugStore.pharmName = $(drugStore.pharmName).text();
+							drugStore.pharmAddress = $(drugStore.pharmAddress).text();
+							drugStore.workTime = $(drugStore.workTime).text();
+							//console.log(drugStore);
+							drugstoreArray.push(drugStore);
+						}
+					});
+					//console.log("Drugstore array: " + drustoreArray);
+					updateDrugstoreListView(drugstoreArray);
+					saveToLocalStorage(drugstoreArray);
+				} else {
+					var errormsg = 'Error: could not load the page.';
+					console.log(errormsg);
+				}
+				hideLoadingBar();
+				$('#drugStoreList').listview('refresh');
+			}
+		);
+	}
+
+	function updateDrugstoreListView(drugstoreArray) {
+		// display all values
+		var dividerMetroName = "";
+		// display all values
+		var drugStore;
+		for (var i = 0; i < drugstoreArray.length; i++) {
+			drugStore = drugstoreArray[i];	
+			if (drugStore.pharmName) {
+				var liCode = "";
+				if (dividerMetroName != drugStore.metroStation) {
+					liCode = '<li data-role="list-divider">' + drugStore.metroStation + '</li>';
+					dividerMetroName = drugStore.metroStation;
+				}
+				liCode = liCode + '<li><a href="#"><h3>м. ' + drugStore.metroStation + '</h3>' +
+				'<p><strong>Адрес:</strong>' + drugStore.pharmAddress + '</p>' +
+				'<p class="ui-li-aside"><strong>' + drugStore.pharmName + '</strong><br>' +
+				drugStore.workTime + '</p>'
+				'</a></li>';
+				$('#drugStoreList').append(liCode);
+			}
+		};
+	}
+
+	function saveToLocalStorage(drugstoreList) {
+		// use the local storage API to persist the data as JSON
+    	window.localStorage.setItem("ru.pharmanet.drugstoreList", JSON.stringify(drugstoreList));
+	}
+
+	function loadFromLocalStorage() {
+		// use the local storage API to persist the data as JSON
+    	var theList = JSON.parse(window.localStorage.getItem("ru.pharmanet.drugstoreList"));
+    	return theList;
+	}
+
+
+	function loadPharmacyList() {
+
+		var targetUrl ="http://www.olekstra.ru/preparati";
+		//make the call to YQL to avoid cross-domain policy in browser
+		showLoadingBar("Загружается список аптек...");
+		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+			"q=select%20*%20from%20html%20where%20url%3D%22"+
+			encodeURIComponent(targetUrl)+
+			"%22&format=xml'&callback=?",
+			function(data){
+				if(data.results[0]){
+					var htmlCode = data.results[0];
+					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
+						var drugName = $(this).find('td')[0];
+						var drugPrice = $(this).find('td')[1];
+						var drugLink = $(this).find('td')[2];
+						if (drugName) {
+							//console.log($(drugName).text());
+							var liCode = '<li><a href="#"><p>' + $(drugName).text() + '</p>' +
+							//'<p><strong>Адрес:</strong>' + $(drugLink).find('a').attr('href') + '</p>' +
+							'<p><strong>Минимальная цена без скидки: ' + $(drugPrice).text() + '</strong></p>'
+							'</a></li>';
+							$('#pharmList').append(liCode);					
+						}
+					});
+				} else {
+					var errormsg = 'Error: could not load the page.';
+					console.log(errormsg);
+				}
+				hideLoadingBar();
+				$('#pharmList').listview('refresh');
+			}
+		);
+	}
+</script>
+</head>
+<body onload="onStartLoad()">
+	<div data-role="page" id="drugstores">
+		<div data-role="header">
+			<h1>Список аптек оператора страхования "Олекстра"</h1>
+			<div data-role="navbar" data-iconpos="left">
+				<ul>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
+					<li><a href="#drugs">Препараты</a></li>
+					<li><a href="#" data-icon="search" onclick="loadListFromSourceSite()">Поиск</a></li>
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Поиск..." id="drugStoreList">
+			</ul>
+		</div><!-- /content -->
+		<div data-role="footer">
+			<h4>My Footer</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+	<div data-role="page" id="drugs">
+		<div data-role="header">
+			<h1>Список препаратов со скидкой 50%</h1>
+			<div data-role="navbar" data-iconpos="left">
+				<ul>
+					<li><a href="#drugstores">Аптеки</a></li>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Препараты</a></li>
+					<!--<li><a href="#" data-icon="search">Поиск</a></li>-->
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content">
+		<p>Препараты, отмеченные звездочкой (*), имеют ограничение по общей сумме покупок. Размер суммы покупок для этой группы лекарств составляет 2400 руб./год, максимальная сумма покупки за один квартал не может превышать 600 руб. Препараты без звездочки не имеют ограничений по сумме покупки.</p>
+
+		<p>На препараты, не указанные в списке, аптеки предоставляют скидки до 5%.</p>
+
+		<p>При покупке препаратов в аптеке сообщайте наименование фирмы-производителя, указанного в названии препарата. Например, "Троксерутин, Зентива": "Троксерутин" - наименование препарата, "Зентива" - наименование производителя. Некоторые препараты в аптеках имеют одинаковое название, но разных производителей. Скидка 50% распространяется только на препараты указанных в таблице производителей. Для всех прочих препаратов скидка составит только до 5%.</p>
+			<ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Поиск..." id="pharmList">
+			</ul>
+		</div><!-- /content -->
+		<div data-role="footer">
+			<h4>My Footer</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+</body>
+</html>

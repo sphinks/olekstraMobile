@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
 <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+<!--Yandex maps-->
+<script src="http://api-maps.yandex.ru/2.0-stable/?load=package.standard&lang=ru-RU" type="text/javascript"></script>
+
 <script type="text/javascript" language="JavaScript">
 
 	/*document.addEventListener("DOMContentLoaded", function(){
@@ -17,6 +20,18 @@
         document.addEventListener("offline", function(){...}, false);
     },false);
 	}, false);*/
+
+    function init(){     
+        myMap = new ymaps.Map ("map", {
+            center: [55.76, 37.64],
+            zoom: 7,
+        });
+
+        // Создание экземпляра элемента управления
+		myMap.controls.add(
+		   new ymaps.control.ZoomControl()
+		);
+    }
 
 	function showLoadingBar(textForLoad) {
 
@@ -36,6 +51,8 @@
 	function onStartLoad() {
 		loadPharmacyList();
 		loadDrugstoresList();
+		ymaps.ready(init);
+    	var myMap;
 	}
 			
 
@@ -174,7 +191,7 @@
 	}
 
 	function loadDrugstoreDetail(drugstoreInfo) { 
-		console.log("Drugstore detail: " + drugstoreInfo.metroStation);
+		//console.log("Drugstore detail: " + drugstoreInfo.metroStation);
 		$('#drugStoreDetailName').html(drugstoreInfo.pharmName); 
 		$('#drugStoreDetailMetro').html(drugstoreInfo.metroStation);
 		$('#drugStoreDetailAddress').html(drugstoreInfo.pharmAddress);
@@ -303,6 +320,7 @@
 				<div class="ui-block-a"><strong>Время работы: </strong></div>
 				<div class="ui-block-b" id="drugStoreDetailTime"></div>
 			</div><!-- /grid-a -->
+			<div id="map" style="width: 600px; height: 400px"></div>
 		</div><!-- /content -->
 		<div data-role="footer">
 		</div><!-- /footer -->
