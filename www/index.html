@@ -21,16 +21,59 @@
     },false);
 	}, false);*/
 
-    function init(){     
-        myMap = new ymaps.Map ("map", {
+	var address = "Москва";
+
+    function init(){
+
+    	//var myMap;
+
+    	ymaps.geocode(address, { results: 1 }).then(function (res) {
+	        // Выбираем первый результат геокодирования.
+	        var firstGeoObject = res.geoObjects.get(0),
+	        // Создаем карту с нужным центром.
+	            myMap = new ymaps.Map("map", {
+	                center: firstGeoObject.geometry.getCoordinates(),
+	                zoom: 15
+	            });
+
+	        myMap.geoObjects.add(res.geoObjects);
+	        myMap.container.fitToViewport();
+	        myMap.controls.add(
+			   new ymaps.control.ZoomControl()
+			);
+	        //attachReverseGeocode(myMap);
+
+    	});
+
+        // Поиск станций метро.
+        // Делаем запрос на обратное геокодирование.
+        /*ymaps.geocode(myMap.getCenter(), {
+            // Ищем только станции метро.
+            kind: 'metro',
+            // Ищем в пределах области видимости карты.
+            boundedBy: myMap.getBounds(),
+            // Запрашиваем не более 20 результатов.
+            results: 20
+        }).then(function (res) {
+            // Задаем изображение для иконок меток.
+            res.geoObjects.options.set('preset', 'twirl#metroMoscowIcon');
+            // Добавляем полученную коллекцию на карту.
+            myMap.geoObjects.add(res.geoObjects);
+        });
+	    }, function (err) {
+	        // Если геокодирование не удалось, сообщаем об ошибке.
+	        alert(err.message);
+	    }*/
+
+        /*myMap = new ymaps.Map ("map", {
             center: [55.76, 37.64],
             zoom: 7,
-        });
+        });*/
 
         // Создание экземпляра элемента управления
-		myMap.controls.add(
+		/*myMap.controls.add(
 		   new ymaps.control.ZoomControl()
-		);
+		);*/
     }
 
 	function showLoadingBar(textForLoad) {
@@ -51,8 +94,8 @@
 	function onStartLoad() {
 		loadPharmacyList();
 		loadDrugstoresList();
-		ymaps.ready(init);
-    	var myMap;
+		
+    	//var myMap;
 	}
 			
 
@@ -80,9 +123,11 @@
 							drugStore.metroStation = $(this).find('td')[1];
 							drugStore.pharmName = $(this).find('td')[2];
 							drugStore.pharmAddress = $(this).find('td')[3];
+							console.log("Test" + drugStore.pharmAddress);
 							drugStore.workTime = $(this).find('td')[4];
 
 							drugStore.workTime = $(drugStore.workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+							drugStore.pharmAddress = $(drugStore.pharmAddress).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
 							if (drugStore.pharmName) {
 								drugStore.metroStation = $(drugStore.metroStation).text();
 								drugStore.pharmName = $(drugStore.pharmName).text();
@@ -133,12 +178,14 @@
 						drugStore.workTime = $(this).find('td')[4];
 
 						drugStore.workTime = $(drugStore.workTime).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+						drugStore.pharmAddress = $(drugStore.pharmAddress).find('span.show-1, span.hide-0').not('span.hide-1').not('span.show-0');
+
 						if (drugStore.pharmName) {
 							drugStore.metroStation = $(drugStore.metroStation).text();
 							drugStore.pharmName = $(drugStore.pharmName).text();
 							drugStore.pharmAddress = $(drugStore.pharmAddress).text();
 							drugStore.workTime = $(drugStore.workTime).text();
-							//console.log(drugStore);
+							console.log(drugStore);
 							drugstoreArray.push(drugStore);
 						}
 					});
@@ -195,7 +242,9 @@
 		$('#drugStoreDetailName').html(drugstoreInfo.pharmName); 
 		$('#drugStoreDetailMetro').html(drugstoreInfo.metroStation);
 		$('#drugStoreDetailAddress').html(drugstoreInfo.pharmAddress);
-		$('#drugStoreDetailTime').html(drugstoreInfo.workTime); 
+		$('#drugStoreDetailTime').html(drugstoreInfo.workTime);
+		address = drugstoreInfo.pharmAddress;
+		ymaps.ready(init);
 		$.mobile.changePage($("#drugstoreInfo"), "slideleft");
 	}
 
