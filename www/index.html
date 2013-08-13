@@ -22,58 +22,38 @@
 	}, false);*/
 
 	var address = "Москва";
+	var myMap;
 
-    function init(){
+    function initMap () {
+	    myMap = new ymaps.Map(
+	        // ID DOM-элемента
+	        'map',
+	        {
+	            center: [55.76, 37.64],
+	            zoom: 15,
+	        }
+	    );
+	}
 
-    	//var myMap;
+    function showDrugstoreOnMap(){
 
     	ymaps.geocode(address, { results: 1 }).then(function (res) {
 	        // Выбираем первый результат геокодирования.
-	        var firstGeoObject = res.geoObjects.get(0),
+	        var firstGeoObject = res.geoObjects.get(0);
 	        // Создаем карту с нужным центром.
-	            myMap = new ymaps.Map("map", {
-	                center: firstGeoObject.geometry.getCoordinates(),
-	                zoom: 15
-	            });
+	        var oldObject = myMap.geoObjects.getIterator().getNext();
+	        if (oldObject) {
+	        	myMap.geoObjects.remove(oldObject);
+	        }
+	        myMap.setCenter(firstGeoObject.geometry.getCoordinates());
+
 
 	        myMap.geoObjects.add(res.geoObjects);
 	        myMap.container.fitToViewport();
 	        myMap.controls.add(
 			   new ymaps.control.ZoomControl()
 			);
-	        //attachReverseGeocode(myMap);
-
     	});
-
-        // Поиск станций метро.
-        // Делаем запрос на обратное геокодирование.
-        /*ymaps.geocode(myMap.getCenter(), {
-            // Ищем только станции метро.
-            kind: 'metro',
-            // Ищем в пределах области видимости карты.
-            boundedBy: myMap.getBounds(),
-            // Запрашиваем не более 20 результатов.
-            results: 20
-        }).then(function (res) {
-            // Задаем изображение для иконок меток.
-            res.geoObjects.options.set('preset', 'twirl#metroMoscowIcon');
-            // Добавляем полученную коллекцию на карту.
-            myMap.geoObjects.add(res.geoObjects);
-        });
-	    }, function (err) {
-	        // Если геокодирование не удалось, сообщаем об ошибке.
-	        alert(err.message);
-	    }*/
-
-        /*myMap = new ymaps.Map ("map", {
-            center: [55.76, 37.64],
-            zoom: 7,
-        });*/
-
-        // Создание экземпляра элемента управления
-		/*myMap.controls.add(
-		   new ymaps.control.ZoomControl()
-		);*/
     }
 
 	function showLoadingBar(textForLoad) {
@@ -92,10 +72,9 @@
 	}
 
 	function onStartLoad() {
-		loadPharmacyList();
+		//loadPharmacyList();
 		loadDrugstoresList();
-		
-    	//var myMap;
+		ymaps.ready(initMap);
 	}
 			
 
@@ -244,7 +223,7 @@
 		$('#drugStoreDetailAddress').html(drugstoreInfo.pharmAddress);
 		$('#drugStoreDetailTime').html(drugstoreInfo.workTime);
 		address = drugstoreInfo.pharmAddress;
-		ymaps.ready(init);
+		showDrugstoreOnMap(address);
 		$.mobile.changePage($("#drugstoreInfo"), "slideleft");
 	}
 
@@ -261,8 +240,7 @@
 
 
 	function loadPharmacyList() {
-
-		var targetUrl ="http://www.olekstra.ru/preparati";
+		var targetUrl ="http://www.olekstra.ru/discount-karta:preparati";
 		//make the call to YQL to avoid cross-domain policy in browser
 		showLoadingBar("Загружается список аптек...");
 		$.getJSON("http://query.yahooapis.com/v1/public/yql?"+
@@ -272,12 +250,13 @@
 			function(data){
 				if(data.results[0]){
 					var htmlCode = data.results[0];
+
 					$('table.wiki-content-table > tbody > tr', $(htmlCode)).each(function () {
 						var drugName = $(this).find('td')[0];
 						var drugPrice = $(this).find('td')[1];
 						var drugLink = $(this).find('td')[2];
 						if (drugName) {
-							//console.log($(drugName).text());
+							console.log($(drugName).text());
 							var liCode = '<li><a href="#"><p>' + $(drugName).text() + '</p>' +
 							//'<p><strong>Адрес:</strong>' + $(drugLink).find('a').attr('href') + '</p>' +
 							'<p><strong>Минимальная цена без скидки: ' + $(drugPrice).text() + '</strong></p>'
@@ -304,7 +283,7 @@
 				<ul>
 					<li><a href="#" class="ui-btn-active ui-state-persist">Аптеки</a></li>
 					<li><a href="#drugs">Препараты</a></li>
-					<li><a href="#" data-icon="search" onclick="loadListFromSourceSite()">Поиск</a></li>
+					<li><a href="#" data-icon="search" onclick="loadListFromSourceSite()">Обновить список</a></li>
 				</ul>
 			</div><!-- /navbar -->
 		</div><!-- /header -->
